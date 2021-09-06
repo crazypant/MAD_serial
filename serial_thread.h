@@ -35,6 +35,7 @@ private:
     int stop;//停止位
     int databits;//数据位
     QSerialPort *serial;
+    int count;//计数器
 
 };
 

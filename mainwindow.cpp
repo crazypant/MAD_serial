@@ -116,7 +116,8 @@ void MainWindow::on_OpenSerialButton_clicked()
     connect(p,&QThread::started,thread_serial,&Serial_thread::ReadyRead);
     connect(thread_serial,&Serial_thread::SendData,this,&MainWindow::ShowData);
     connect(this,&MainWindow::Sent2Serial,thread_serial,&Serial_thread::Send);
-    connect(this,&MainWindow::on_SendButton_2_clicked,thread_serial,&Serial_thread::SendFile);
+    connect(this,&MainWindow::SendFileSignal,thread_serial,&Serial_thread::SendFile);
+    //connect(this,&MainWindow::on_SendButton_2_clicked,thread_serial,&Serial_thread::SendFile);
     p->start();
     qDebug()<<"串口线程开始";
 
@@ -161,11 +162,12 @@ void MainWindow::on_SendButton_clicked()
 //发送数据文件
 void MainWindow::on_SendButton_2_clicked()
 {
+    qDebug()<<"发送文件";
     //QString s1 = "t0.txt=\"111ss44s\"";
     QByteArray ba = ui->textEdit_2->toPlainText().toLatin1();
     ba.append('\xff');
     ba.append('\xff');
     ba.append('\xff');
     //serial->write(ui->textEdit_2->toPlainText().toLatin1());
-    emit Sent2Serial(ba);
+    emit SendFileSignal();
 }

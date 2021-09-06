@@ -25,7 +25,7 @@ public:
     ~MainWindow();
 signals:
     void Sent2Serial(QByteArray);
-
+    void SendFileSignal();
 private slots:
     void on_OpenSerialButton_clicked();
 

@@ -2,7 +2,7 @@
 
 Serial_thread::Serial_thread(QObject *parent) : QObject(parent)
 {
-
+    count = 0;
 }
 
 
@@ -63,5 +63,29 @@ void Serial_thread::EndSerial()
 
 void Serial_thread::SendFile()
 {
-    qDebug()<<"文件";
+    int h=0;
+    QByteArray line_data;
+    qDebug()<<"发送文件串口";
+    QString filepath = "ddd";
+    QFile file(filepath);
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        qDebug()<<" 文件打开失败！";
+        return;
+    }
+    int len =1;
+
+    while(!file.atEnd())
+    {
+        //Sleep(10);
+
+
+        len = 0;
+        line_data = file.readLine();
+        qDebug()<<line_data.size();
+
+        len = serial->write(line_data);
+        h = h+1;
+
+    }
 }
