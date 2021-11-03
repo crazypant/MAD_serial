@@ -22,8 +22,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //设置波特率下拉菜单默认显示第0项
     ui->BaudBox->setCurrentIndex(0);
-
-
+    //最大最小值
+    data_queue.clear();
+    min = 0;
+    max = 0;
 }
 
 MainWindow::~MainWindow()
@@ -116,6 +118,8 @@ void MainWindow::on_OpenSerialButton_clicked()
     connect(p,&QThread::started,thread_serial,&Serial_thread::ReadyRead);
     connect(thread_serial,&Serial_thread::SendData,this,&MainWindow::ShowData);
     connect(this,&MainWindow::Sent2Serial,thread_serial,&Serial_thread::Send);
+    connect(this,&MainWindow::Sent2data,thread_serial,&Serial_thread::Send_data);
+    connect(this,&MainWindow::Sent2peak,thread_serial,&Serial_thread::Send_peak);
     connect(this,&MainWindow::on_SendButton_2_clicked,thread_serial,&Serial_thread::SendFile);
     p->start();
     qDebug()<<"串口线程开始";
@@ -150,6 +154,7 @@ void MainWindow::ShowData(QByteArray ba)
 //发送按钮槽函数
 void MainWindow::on_SendButton_clicked()
 {
+
     //QString s1 = "t0.txt=\"111ss44s\"";
     QByteArray ba = ui->textEdit_2->toPlainText().toLatin1();
     ba.append('\xff');
@@ -161,11 +166,72 @@ void MainWindow::on_SendButton_clicked()
 //发送数据文件
 void MainWindow::on_SendButton_2_clicked()
 {
-    //QString s1 = "t0.txt=\"111ss44s\"";
-    QByteArray ba = ui->textEdit_2->toPlainText().toLatin1();
-    ba.append('\xff');
-    ba.append('\xff');
-    ba.append('\xff');
-    //serial->write(ui->textEdit_2->toPlainText().toLatin1());
-    emit Sent2Serial(ba);
+    QByteArray line_data;
+    int h = 0;
+    filepath = QFileDialog::getOpenFileName(this,"file","","text(*.txt)");
+    qDebug()<<filepath;
+    QFileInfo fileInfo(filepath);
+    if(!fileInfo.isFile()){
+        qDebug()<<"fail";
+        return;
+    }
+    QFile file(filepath);
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        qDebug()<<" 文件打开失败！";
+        return;
+    }
+    int len =1;
+    while(!file.atEnd())
+    {
+        sleep(100);
+        len = 0;
+        line_data = file.readLine();
+        QString str_num = QString(line_data);
+        double num = str_num.toDouble();
+        if (data_queue.size()<300)
+        {
+            data_queue.push_back(num);
+            min = data_queue.back();
+        }else if(data_queue.size()==300)
+        {
+
+            data_queue.push_back(num);
+            data_queue.pop_front();
+            double dif = FindDif(data_queue);
+            QString dif_str = QString::number(dif);
+            qDebug()<<"峰峰值:"<<dif_str;
+            emit Sent2peak(dif_str.toLatin1());
+        }
+        qDebug()<<str_num;
+        emit Sent2data(line_data);
+        h = h+1;
+
+    }
+}
+
+void MainWindow::sleep(int msec)//休眠多少毫秒
+{
+    QTime reachTime = QTime::currentTime().addMSecs(msec);
+    //qDebug()<<reachTime;
+    while(QTime::currentTime()<reachTime)
+    {
+        QCoreApplication::processEvents(QEventLoop::AllEvents,100);
+    }
+}
+
+double MainWindow::FindDif(QQueue<double> data)
+{
+    double max = data.at(0);
+    double min = data.at(0);
+    qDebug()<<"队列长度:"<<data.size();
+    for (int i =0;i<data.size();i++)
+    {
+        if(data.at(i)>max)
+            max = data.at(i);
+        if(data.at(i)<min)
+            min = data.at(i);
+    }
+    double dif = max - min;
+    return dif;
 }

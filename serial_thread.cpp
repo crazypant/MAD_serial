@@ -18,6 +18,7 @@ void Serial_thread::ReadyRead()
     serial->setFlowControl(QSerialPort::NoFlowControl);
     connect(serial,&QSerialPort::readyRead,this,&Serial_thread::DealData);
 
+
 }
 
 
@@ -53,6 +54,29 @@ void Serial_thread::Send(QByteArray ba)
 {
     serial->write(ba);
 }
+void Serial_thread::Send_data(QByteArray ba)
+{
+
+    std::string str = ba.toStdString();
+    str = "t0.txt=\""+str+"\"";
+
+    QByteArray data = QByteArray::fromStdString(str);
+    data.append('\xff');
+    data.append('\xff');
+    data.append('\xff');
+    serial->write(data);
+}
+void Serial_thread::Send_peak(QByteArray ba)
+{
+    std::string str = ba.toStdString();
+    str = "t3.txt=\""+str+"\"";
+    QByteArray data = QByteArray::fromStdString(str);
+    data.append('\xff');
+    data.append('\xff');
+    data.append('\xff');
+    serial->write(data);
+}
+
 
 void Serial_thread::EndSerial()
 {

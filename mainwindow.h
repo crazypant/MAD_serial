@@ -9,8 +9,13 @@
 #include <QFile>
 #include <QDialog>
 #include <QDir>
+#include <QFileDialog>
 #include <QTimer>
+#include <QApplication>
+#include <QTime>
+#include <QQueue>
 #include "serial_thread.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -25,7 +30,8 @@ public:
     ~MainWindow();
 signals:
     void Sent2Serial(QByteArray);
-
+    void Sent2data(QByteArray);
+    void Sent2peak(QByteArray);
 private slots:
     void on_OpenSerialButton_clicked();
 
@@ -40,6 +46,13 @@ private:
     QSerialPort *serial;
     Serial_thread *thread_serial;
     QTimer dataTimer;
+    QString filepath;
+    void sleep(int);
+    double max;
+    double min;
+    double FindDValue();
+    double FindDif(QQueue<double>);
+    QQueue<double> data_queue;
 private slots:
     void ShowData(QByteArray);
 

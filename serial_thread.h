@@ -22,7 +22,8 @@ public slots:
     void Send(QByteArray ba);
     void EndSerial();
     void SendFile();
-
+    void Send_data(QByteArray ba);
+    void Send_peak(QByteArray ba);
 signals:
     void SendData(QByteArray);
 
