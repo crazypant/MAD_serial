@@ -69,7 +69,7 @@ void Serial_thread::Send_data(QByteArray ba)
 void Serial_thread::Send_peak(QByteArray ba)
 {
     std::string str = ba.toStdString();
-    str = "t3.txt=\""+str+"\"";
+    str = "t6.txt=\""+str+"\"";
     QByteArray data = QByteArray::fromStdString(str);
     data.append('\xff');
     data.append('\xff');
